@@ -1,16 +1,37 @@
-#' Mixed graph model estimate
+#' CLSPT function
 #'
-#' @description MixedGraph is the main function of the package, it uses the BRAIL to do the regression.
+#' @description The main function in CLSPT package
 #'
+#' @param in.file1 one of the input sequence file, the default value is NULL.
+#' @param in.file2 the other one of the input sequence file, the default value is NULL.
+#' @param out.file the file where the result will save. If not set the value, the result will show in the screen.
+#'
+#' @return the subset framedata which indicate the predictation of salmonella.
+#'
+#' @example
+#'  CLSPT("./1.fasta", "./2.fasta")
+#'
+#' @importFrom utils read.table
+#' @export
 CLSPT <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
     if (is.null(in.file1) && is.null(in.file2)) {
         # shiny
     }
+    # CLSPT("./testdata/1.fasta", "./testdata/2.fasta")
     file1.subset <- GetMapIterm(in.file1)
     file2.subset <- GetMapIterm(in.file2)
     merge(file1.subset, file2.subset)
 }
 
+
+#' Return the mapping interval_seq_ID
+#'
+#' @param file.name the input file name
+#' @return the subset framedata which include the input new spacer code of the sequence or the reverse complement sequence
+#'
+#' @example
+#' GetMapIterm("./testdata/1.fasta")
+#'
 GetMapIterm <- function(file.name = NULL) {
     map.file <- "./lib/mapping_tbl.txt"
     mapping.table <- read.table(map.file, sep = "\t")
@@ -31,6 +52,12 @@ GetMapIterm <- function(file.name = NULL) {
     subset(mapping.table, is.element(V1, new.spacer.arr) | is.element(V2, new.spacer.arr))
 }
 
+
+#' Get the new spacer from the molecular sequence and map it to the code
+#'
+#' @param molecular.seq the molecular sequence
+#' @return the string which is the new spacer code\
+#'
 GetNewSpacerCode <- function(molecular.seq = NULL) {
     if (is.null(molecular.seq))
         return (NULL)
@@ -42,6 +69,16 @@ GetNewSpacerCode <- function(molecular.seq = NULL) {
     spacer.char <- as.character(subset(match.spacer, V3 == new.spacer, select = V1)[1, 1])
 }
 
+
+#' Get the new spacer from the molecular sequence
+#'
+#' @param molecular.seq the molecular sequence
+#' @return the string which is the new spacer
+#'
+#' @example
+#' GetNewSpacer(GCGCCGGGAACACCAACGTCGGTTTATCCCCGCTGGCGCCGGGAACACAGGCGGACCGAAAAACCGTTTTCAGCCAACGTCGGTTTATCCCCGCTGGCGCCGGGAACACCAACGTCGGTTT)
+#'
+#' @export
 GetNewSpacer <- function(molecular.seq = NULL) {
     if (is.null(molecular.seq))
         return(NULL)
@@ -63,6 +100,11 @@ GetNewSpacer <- function(molecular.seq = NULL) {
     spacers[length(spacers) - 1]
 }
 
+#' Read the three types of input file
+#'
+#' @param file.name the input file name
+#' @return the string which represents the molecular sequence
+#'
 ReadInFile <- function(file.name) {
     data <- readLines(file.name)
     if (substring(data[1], 1, 1) == '>')
@@ -70,6 +112,11 @@ ReadInFile <- function(file.name) {
     paste(data, sep = "")
 }
 
+#' Return the reverse complement of the sequence
+#'
+#' @param x the input sequence
+#' @return the reverse complement sequence string
+#'
 GetReverseComplement <- function(x) {
     rev(chartr("ATGC","TACG",x))
 }
