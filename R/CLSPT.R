@@ -16,11 +16,18 @@
 CLSPT <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
     if (is.null(in.file1) && is.null(in.file2)) {
         # shiny
+        stop("No such files!")
     }
     # CLSPT("./testdata/1.fasta", "./testdata/2.fasta")
     file1.subset <- GetMapIterm(in.file1)
     file2.subset <- GetMapIterm(in.file2)
-    merge(file1.subset, file2.subset)
+    data.result <- merge(file1.subset, file2.subset)
+    if (is.null(out.file)) {
+        print(data.result)
+    }
+    else {
+        save(data.result, file = out.file)
+    }
 }
 
 
@@ -33,7 +40,8 @@ CLSPT <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
 #' GetMapIterm("./testdata/1.fasta")
 #'
 GetMapIterm <- function(file.name = NULL) {
-    map.file <- "./lib/mapping_tbl.txt"
+    map.file <- "./inst/extdata/mapping_tbl.txt"
+    # map.file <- "./mapping_tbl.txt" # in the package
     mapping.table <- read.table(map.file, sep = "\t")
 
     if (is.null(file.name))
@@ -64,8 +72,10 @@ GetNewSpacerCode <- function(molecular.seq = NULL) {
     new.spacer <- GetNewSpacer(molecular.seq)
     if (is.null(new.spacer))
         return (NULL)
-    spacer.file <- "./lib/spacer_tbl.txt"
+    spacer.file <- "./inst/extdata/spacer_tbl.txt"
+    # spacer.file <- "./spacer_tbl.txt" # in the package
     match.spacer <- read.table(spacer.file)
+    print(match.spacer)
     spacer.char <- as.character(subset(match.spacer, V3 == new.spacer, select = V1)[1, 1])
 }
 
@@ -83,7 +93,8 @@ GetNewSpacer <- function(molecular.seq = NULL) {
     if (is.null(molecular.seq))
         return(NULL)
     molecular.seq <- toupper(molecular.seq)
-    DR.file <- "./lib/dr_tbl.txt"
+    # DR.file <- "./dr_tbl.txt" # in the package
+    DR.file <- "./inst/extdata/dr_tbl.txt"
     patterns <- read.table(DR.file)
     max.match <- "-"
     max.count <- -1
@@ -100,6 +111,7 @@ GetNewSpacer <- function(molecular.seq = NULL) {
     spacers[length(spacers) - 1]
 }
 
+
 #' Read the three types of input file
 #'
 #' @param file.name the input file name
@@ -109,8 +121,9 @@ ReadInFile <- function(file.name) {
     data <- readLines(file.name)
     if (substring(data[1], 1, 1) == '>')
         data <- data[-1]
-    paste(data, sep = "")
+    paste(data, collapse = "")
 }
+
 
 #' Return the reverse complement of the sequence
 #'
