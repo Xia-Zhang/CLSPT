@@ -18,6 +18,7 @@ CLSPT <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
         # shiny
         stop("No such files!")
     }
+    InitGlobal()
     # CLSPT("./testdata/1.fasta", "./testdata/2.fasta")
     file1.subset <- GetMapIterm(in.file1)
     file2.subset <- GetMapIterm(in.file2)
@@ -40,16 +41,12 @@ CLSPT <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
 #' GetMapIterm("./testdata/1.fasta")
 #'
 GetMapIterm <- function(file.name = NULL) {
-    map.file <- "./inst/extdata/mapping_tbl.txt"
-    # map.file <- "./mapping_tbl.txt" # in the package
-    mapping.table <- read.table(map.file, sep = "\t")
-
     if (is.null(file.name))
-        return (mapping.table)
+        return (mapping.table.global)
     molecular.seq <- ReadInFile(file.name)
     molecular.seq.rev <- GetReverseComplement(molecular.seq)
     if (is.null(molecular.seq))
-        return (mapping.table)
+        return (mapping.table.global)
     new.spacer <- GetNewSpacerCode(molecular.seq)
     new.spacer.rev <- GetNewSpacerCode(molecular.seq.rev)
     new.spacer.arr <- character()
@@ -57,7 +54,9 @@ GetMapIterm <- function(file.name = NULL) {
         new.spacer.arr <- c(new.spacer.arr, new.spacer)
     if (is.null(new.spacer.rev) == FALSE && is.na(new.spacer.rev) == FALSE)
         new.spacer.arr <- c(new.spacer.arr, new.spacer.rev)
-    subset(mapping.table, is.element(V1, new.spacer.arr) | is.element(V2, new.spacer.arr))
+    if (length(new.spacer.arr) == 0)
+        return (mapping.table.global)
+    subset(mapping.table.global, is.element(V1, new.spacer.arr) | is.element(V2, new.spacer.arr))
 }
 
 
@@ -72,11 +71,7 @@ GetNewSpacerCode <- function(molecular.seq = NULL) {
     new.spacer <- GetNewSpacer(molecular.seq)
     if (is.null(new.spacer))
         return (NULL)
-    spacer.file <- "./inst/extdata/spacer_tbl.txt"
-    # spacer.file <- "./spacer_tbl.txt" # in the package
-    match.spacer <- read.table(spacer.file)
-    print(match.spacer)
-    spacer.char <- as.character(subset(match.spacer, V3 == new.spacer, select = V1)[1, 1])
+    spacer.char <- as.character(subset(spacers.table.global, V3 == new.spacer, select = V1)[1, 1])
 }
 
 
@@ -91,14 +86,11 @@ GetNewSpacerCode <- function(molecular.seq = NULL) {
 #' @export
 GetNewSpacer <- function(molecular.seq = NULL) {
     if (is.null(molecular.seq))
-        return(NULL)
+        return (NULL)
     molecular.seq <- toupper(molecular.seq)
-    # DR.file <- "./dr_tbl.txt" # in the package
-    DR.file <- "./inst/extdata/dr_tbl.txt"
-    patterns <- read.table(DR.file)
     max.match <- "-"
     max.count <- -1
-    for (x in patterns$V3[-1]) {
+    for (x in dr.table.global$V3[-1]) {
         t <- gregexpr(pattern = x, text = molecular.seq)
         if (t[[1]][1] != -1 && length(t[[1]]) > max.count) {
             max.match = x
@@ -106,11 +98,31 @@ GetNewSpacer <- function(molecular.seq = NULL) {
         }
     }
     if (max.count < 1)
-        return(NULL)
+        return (NULL)
     spacers <- strsplit(molecular.seq, max.match)[[1]]
     spacers[length(spacers) - 1]
 }
 
+
+FindNewSpacer <- function(molecular.seq = NULL) {
+    if (is.null(molecular.seq))
+        return (FALSE)
+    molecular.seq <- toupper(molecular.seq)
+    max.match <- "-"
+    max.count <- -1
+    for (x in dr.table.global$V3[-1]) {
+        t <- gregexpr(pattern = x, text = molecular.seq)
+        if (t[[1]][1] != -1 && length(t[[1]]) > max.count) {
+            max.match = x
+            max.count = length(t[[1]])
+        }
+    }
+    if (max.count < 1)
+        return (FALSE)
+    spacers <- strsplit(molecular.seq, max.match)[[1]]
+    new.spacer <- spacers[length(spacers) - 1]
+    return (is.element(new.spacer, spacers.table.global$V3))
+}
 
 #' Read the three types of input file
 #'
@@ -131,5 +143,24 @@ ReadInFile <- function(file.name) {
 #' @return the reverse complement sequence string
 #'
 GetReverseComplement <- function(x) {
-    rev(chartr("ATGC","TACG",x))
+    a <- chartr("ATGC","TACG",x)
+    paste(rev(substring(a, 1 : nchar(a), 1 : nchar(a))), collapse = "")
+}
+
+
+InitGlobal <- function(x) {
+    map.file <- "./inst/extdata/mapping_tbl.txt"
+    # map.file <- "./mapping_tbl.txt" # in the package
+    DR.file <- "./inst/extdata/dr_tbl.txt"
+    # DR.file <- "./dr_tbl.txt" # in the package
+    spacer.file <- "./inst/extdata/spacer_tbl.txt"
+    # spacer.file <- "./spacer_tbl.txt" # in the package
+
+    if (exists("mapping.table.global") == FALSE)
+        mapping.table.global <<- read.table(map.file, sep = "\t")
+    if (exists("patterns.table.global") == FALSE)
+        dr.table.global <<- read.table(DR.file)
+    if (exists("spacers.table.global") == FALSE)
+        spacers.table.global <<- read.table(spacer.file)
+
 }
