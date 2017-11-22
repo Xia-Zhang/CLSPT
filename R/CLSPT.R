@@ -92,7 +92,7 @@ GetNewSpacerCode <- function(molecular.seq = NULL) {
 GetNewSpacer <- function(molecular.seq = NULL) {
     if (is.null(molecular.seq))
         return (NULL)
-    molecular.seq <- toupper(molecular.seq)
+    InitGlobal()
     max.match <- "-"
     max.count <- -1
     for (x in dr.table.global$V3[-1]) {
@@ -105,6 +105,9 @@ GetNewSpacer <- function(molecular.seq = NULL) {
     if (max.count < 1)
         return (NULL)
     spacers <- strsplit(molecular.seq, max.match)[[1]]
+    if (substr(molecular.seq, nchar(molecular.seq) - nchar(max.match) + 1, nchar(molecular.seq)) == max.match) {
+        return (spacers[length(spacers)])
+    }
     spacers[length(spacers) - 1]
 }
 
@@ -116,7 +119,6 @@ GetNewSpacer <- function(molecular.seq = NULL) {
 FindNewSpacer <- function(molecular.seq = NULL) {
     if (is.null(molecular.seq))
         return (FALSE)
-    molecular.seq <- toupper(molecular.seq)
     max.match <- "-"
     max.count <- -1
     for (x in dr.table.global$V3[-1]) {
@@ -142,7 +144,7 @@ ReadInFile <- function(file.name) {
     data <- readLines(file.name)
     if (substring(data[1], 1, 1) == '>')
         data <- data[-1]
-    paste(data, collapse = "")
+    toupper(paste(data, collapse = ""))
 }
 
 #' Read the file and get the reverse complement
