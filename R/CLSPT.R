@@ -103,7 +103,11 @@ GetNewSpacer <- function(molecular.seq = NULL) {
     spacers[length(spacers) - 1]
 }
 
-
+#' Check if the new spacer exist in the sequence
+#'
+#' @param x the input sequence
+#' @return TRUE or FALSE to represent the existance
+#'
 FindNewSpacer <- function(molecular.seq = NULL) {
     if (is.null(molecular.seq))
         return (FALSE)
@@ -148,7 +152,9 @@ GetReverseComplement <- function(x) {
 }
 
 
-InitGlobal <- function(x) {
+#' Setting the global varible reading from files
+#'
+InitGlobal <- function() {
     map.file <- "./inst/extdata/mapping_tbl.txt"
     # map.file <- "./mapping_tbl.txt" # in the package
     DR.file <- "./inst/extdata/dr_tbl.txt"
