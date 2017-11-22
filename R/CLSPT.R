@@ -20,9 +20,14 @@ CLSPT <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
     }
     InitGlobal()
     # CLSPT("./testdata/1.fasta", "./testdata/2.fasta")
-    file1.subset <- GetMapIterm(in.file1)
-    file2.subset <- GetMapIterm(in.file2)
-    data.result <- merge(file1.subset, file2.subset)
+    subset1 <- GetMapIterm(in.file1)
+    subset2 <- GetMapIterm(in.file2)
+    print(nrow(mapping.table.global))
+    if (nrow(subset1) == nrow(mapping.table.global) && nrow(subset2) == nrow(mapping.table.global)) {
+        print("Sorry. We did not find any corresponding serotype in the lib.")
+        return (NULL)
+    }
+    data.result <- merge(subset1, subset2)
     if (is.null(out.file)) {
         print(data.result)
     }
@@ -31,12 +36,12 @@ CLSPT <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
     }
 }
 
-
 #' Return the mapping interval_seq_ID
 #'
 #' @param file.name the input file name
 #' @return the subset framedata which include the input new spacer code of the sequence or the reverse complement sequence
 #'
+#' @note if there doesn't exist any new spacer, the function would return the whole mapping table.
 #' @example
 #' GetMapIterm("./testdata/1.fasta")
 #'
@@ -140,6 +145,16 @@ ReadInFile <- function(file.name) {
     paste(data, collapse = "")
 }
 
+#' Read the file and get the reverse complement
+#'
+#' @param file.na,e the input file name
+#' @return the vector combined with the original string and the reverse complement
+#'
+ReadInFileConvert <- function(file.name) {
+    str <- ReadInFile(file.name)
+    str.rev <- GetReverseComplement(str)
+    c(str, str.rev)
+}
 
 #' Return the reverse complement of the sequence
 #'
