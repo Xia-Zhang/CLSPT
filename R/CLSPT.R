@@ -22,12 +22,12 @@ CLSPT <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
     # CLSPT("./testdata/1.fasta", "./testdata/2.fasta")
     subset1 <- GetMapIterm(in.file1)
     subset2 <- GetMapIterm(in.file2)
-    print(nrow(mapping.table.global))
-    if (nrow(subset1) == nrow(mapping.table.global) && nrow(subset2) == nrow(mapping.table.global)) {
+    data.result <- merge(subset1, subset2)
+    if (nrow(subset1) == nrow(mapping.table.global) && nrow(subset2) == nrow(mapping.table.global) 
+        || nrow(data.result) == 0) {
         print("Sorry. We did not find any corresponding serotype in the lib.")
         return (NULL)
     }
-    data.result <- merge(subset1, subset2)
     if (is.null(out.file)) {
         print(data.result)
     }
