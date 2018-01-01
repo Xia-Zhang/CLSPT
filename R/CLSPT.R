@@ -59,8 +59,14 @@ GetMapIterm <- function(file.name = NULL) {
         new.spacer.arr <- c(new.spacer.arr, new.spacer)
     if (is.null(new.spacer.rev) == FALSE && is.na(new.spacer.rev) == FALSE)
         new.spacer.arr <- c(new.spacer.arr, new.spacer.rev)
-    if (length(new.spacer.arr) == 0)
+    if (length(new.spacer.arr) == 0) {
+        print("The new spacer in CRISPR: (NA)")
         return (mapping.table.global)
+    }
+    else {
+      new.str = paste(new.spacer.arr, collapse = " ")
+      print(paste("The new spacer in CRISPR:", new.str))
+    }
     subset(mapping.table.global, is.element(V1, new.spacer.arr) | is.element(V2, new.spacer.arr))
 }
 
