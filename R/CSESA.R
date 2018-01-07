@@ -32,18 +32,18 @@ CLSPT <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
     
     PrintClspt(clspt.result)
     
-    print(clspt.result)
-    exit(0)
-    subset1 <- GetMapIterm(in.file1)
-    subset2 <- GetMapIterm(in.file2)
-    data.result <- merge(subset1, subset2)
-    if (nrow(subset1) == nrow(mapping.table.global) && nrow(subset2) == nrow(mapping.table.global) 
-        || nrow(data.result) == 0) {
-        print("Sorry. We did not find any corresponding serotype in the lib.")
-        return (NULL)
-    }
+    #     print(clspt.result)
+    #     exit(0)
+    #     subset1 <- GetMapIterm(in.file1)
+    #     subset2 <- GetMapIterm(in.file2)
+    #     data.result <- merge(subset1, subset2)
+    #     if (nrow(subset1) == nrow(mapping.table.global) && nrow(subset2) == nrow(mapping.table.global) 
+    #         || nrow(data.result) == 0) {
+    #         print("Sorry. We did not find any corresponding serotype in the lib.")
+    #         return (NULL)
+    #     }
     if (is.null(out.file)) {
-        print(data.result)
+        PrintClspt(data.result)
     }
     else {
         save(data.result, file = out.file)
@@ -100,6 +100,23 @@ GetAllNewSpacers <- function(molecular.seq = NULL) {
         return (NA)
     }
     else return (new.spacer.arr)
+}
+
+FindSerotype <- function(clspt1 = NA, clspt2 = NA) {
+    if (is.na(clspt1) == TRUE && is.na(clspt2) == TRUE) {
+        stop("Sorry. We did not find any corresponding serotype in the lib!")
+    }
+    if (is.na(clspt1) == TRUE || is.na(clspt2) == TRUE) {
+        clspt <- clspt1
+        if (is.na(clspt1))
+            clspt <- clspt2
+        serotype <- subset(mapping.table.global, is.element(V1, clspt) | is.element(V2, clspt), select = V3)
+    }
+    else {
+        serotype <- subset(mapping.table.global, is.element(V1, clspt1) & is.element(v2, clspt2) | 
+                   is.element(V1, clspt2) & is.element(V2, clspt1), select = c(V3, V4))
+    }
+    return (serotype)
 }
 
 #' Get the new spacer from the molecular sequence and map it to the code
