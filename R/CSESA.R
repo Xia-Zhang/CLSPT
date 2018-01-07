@@ -228,8 +228,8 @@ GetReverseComplement <- function(x) {
 InitGlobal <- function() {
     map.file <- "./inst/extdata/mapping_tbl.txt"
     # map.file <- "./mapping_tbl.txt" # in the package
-    DR.file <- "./inst/extdata/dr_tbl.txt"
-    # DR.file <- "./dr_tbl.txt" # in the package
+    DR.file <- "./inst/extdata/DR_tbl.txt"
+    # DR.file <- "./DR_tbl.txt" # in the package
     spacer.file <- "./inst/extdata/spacer_tbl.txt"
     # spacer.file <- "./spacer_tbl.txt" # in the package
 
