@@ -29,9 +29,6 @@ CLSPT <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
     
     clspt.result$serotype <- FindSerotype(clspt.result$spacer1, clspt.result$spacer2)
     
-    
-    PrintClspt(clspt.result)
-    
     #     print(clspt.result)
     #     exit(0)
     #     subset1 <- GetMapIterm(in.file1)
@@ -43,10 +40,10 @@ CLSPT <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
     #         return (NULL)
     #     }
     if (is.null(out.file)) {
-        PrintClspt(data.result)
+        PrintClspt(clspt.result)
     }
     else {
-        save(data.result, file = out.file)
+        save(clspt.result, file = out.file)
     }
 }
 
@@ -111,9 +108,10 @@ FindSerotype <- function(clspt1 = NA, clspt2 = NA) {
         if (is.na(clspt1))
             clspt <- clspt2
         serotype <- subset(mapping.table.global, is.element(V1, clspt) | is.element(V2, clspt), select = V3)
+        serotype <- serotype[duplicated(serotype), ]
     }
     else {
-        serotype <- subset(mapping.table.global, is.element(V1, clspt1) & is.element(v2, clspt2) | 
+        serotype <- subset(mapping.table.global, is.element(V1, clspt1) & is.element(V2, clspt2) | 
                    is.element(V1, clspt2) & is.element(V2, clspt1), select = c(V3, V4))
     }
     return (serotype)
@@ -187,6 +185,25 @@ FindNewSpacer <- function(molecular.seq = NULL) {
     spacers <- strsplit(molecular.seq, max.match)[[1]]
     new.spacer <- spacers[length(spacers) - 1]
     return (is.element(new.spacer, spacers.table.global$V3))
+}
+
+PrintClspt <- function(clspt) {
+    if (is.null(clspt)) {
+        stop("The clspt object should be set!")
+    }
+    
+    print(paste("The new spacer in CRISPR1:", clspt$spacer1))
+    print(paste("The new spacer in CRISPR2:", clspt$spacer2))
+    
+    if (is.na(clspt$spacer1) || is.na(clspt$spacer2)) {
+        result <- paste("The possible serotype: [", paste(clspt$serotype[, 1], collapse = "] ["), sep = "")
+        print(paste(result, "]", sep = ""))
+    }
+    else {
+        result <- paste(clspt$serotype[, 1], clspt$serotype[, 2])
+        result <- paste("The possible serotype: [", paste(result, collapse = "] ["), sep = "")
+        print(paste(result, "]", sep = ""))
+    }
 }
 
 #' Read the three types of input file
