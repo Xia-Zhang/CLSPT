@@ -9,7 +9,7 @@
 #' @return the subset framedata which indicate the predictation of salmonella.
 #'
 #' @example
-#'  CLSPT("./1.fasta", "./2.fasta")
+#'  CLSPT("./testdata/1.fasta", "./testdata/2.fasta")
 #'
 #' @importFrom utils read.table
 #' @export
@@ -78,6 +78,7 @@ GetMapIterm <- function(file.name = NULL) {
       new.str = paste(new.spacer.arr, collapse = " ")
       print(paste("The new spacer in CRISPR:", new.str))
     }
+    V1 = V2 = NULL
     subset(mapping.table.global, is.element(V1, new.spacer.arr) | is.element(V2, new.spacer.arr))
 }
 
@@ -103,6 +104,7 @@ FindSerotype <- function(clspt1 = NA, clspt2 = NA) {
     if (is.na(clspt1) == TRUE && is.na(clspt2) == TRUE) {
         stop("Sorry. We did not find any corresponding serotype in the lib!")
     }
+    V1 = V2 = V3 = V4 = NULL
     if (is.na(clspt1) == TRUE || is.na(clspt2) == TRUE) {
         clspt <- clspt1
         if (is.na(clspt1))
@@ -165,7 +167,7 @@ GetNewSpacer <- function(molecular.seq = NULL) {
 
 #' Check if the new spacer exist in the sequence
 #'
-#' @param x the input sequence
+#' @param molecular.seq the input sequence
 #' @return TRUE or FALSE to represent the existance
 #'
 FindNewSpacer <- function(molecular.seq = NULL) {
@@ -241,14 +243,14 @@ GetReverseComplement <- function(x) {
 
 
 #' Setting the global varible reading from files
-#'
+#' importFrom("utils", "read.table")
 InitGlobal <- function() {
-    map.file <- "./inst/extdata/mapping_tbl.txt"
-    # map.file <- "./mapping_tbl.txt" # in the package
-    DR.file <- "./inst/extdata/DR_tbl.txt"
-    # DR.file <- "./DR_tbl.txt" # in the package
-    spacer.file <- "./inst/extdata/spacer_tbl.txt"
-    # spacer.file <- "./spacer_tbl.txt" # in the package
+    # map.file <- "./inst/extdata/mapping_tbl.txt"
+    map.file <- "./mapping_tbl.txt" # in the package
+    # DR.file <- "./inst/extdata/DR_tbl.txt"
+    DR.file <- "./DR_tbl.txt" # in the package
+    # spacer.file <- "./inst/extdata/spacer_tbl.txt"
+    spacer.file <- "./spacer_tbl.txt" # in the package
 
     if (exists("mapping.table.global") == FALSE)
         mapping.table.global <<- read.table(map.file, sep = "\t")

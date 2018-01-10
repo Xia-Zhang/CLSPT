@@ -1,4 +1,12 @@
-^.*\.Rproj$
-^\.Rproj\.user$
+\.o$
+\.so$
+\.dll$
+\.travis.yml$
 \.git$
 \.gitignore$
+^docs$
+^_pkgdown\.yml$
+^script$
+^vignettes$
+^.*\.Rproj$
+^\.Rproj\.user$
