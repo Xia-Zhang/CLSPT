@@ -246,11 +246,11 @@ GetReverseComplement <- function(x) {
 #' importFrom("utils", "read.table")
 InitGlobal <- function() {
     # map.file <- "./inst/extdata/mapping_tbl.txt"
-    map.file <- "./mapping_tbl.txt" # in the package
+    map.file <- system.file("extdata", "mapping_tbl.txt", package = "CSESA")
     # DR.file <- "./inst/extdata/DR_tbl.txt"
-    DR.file <- "./DR_tbl.txt" # in the package
+    DR.file <- system.file("extdata", "DR_tbl.txt", package = "CSESA")
     # spacer.file <- "./inst/extdata/spacer_tbl.txt"
-    spacer.file <- "./spacer_tbl.txt" # in the package
+    spacer.file <- system.file("extdata", "spacer_tbl.txt", package = "CSESA")
 
     if (exists("mapping.table.global") == FALSE)
         mapping.table.global <<- read.table(map.file, sep = "\t")
