@@ -1,4 +1,4 @@
-#' CLSPT function
+#' CSESA (CRISPR-based Salmonella enterica Serotype Analyzer)
 #'
 #' @description The main function in CSESA package
 #'
