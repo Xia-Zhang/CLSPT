@@ -9,12 +9,12 @@
 #' @return the subset framedata which indicate the predictation of salmonella.
 #'
 #' @example
-#'  CLSPT("./testdata/1.fasta", "./testdata/2.fasta")
+#'  CSESA("./testdata/1.fasta", "./testdata/2.fasta")
 #'
 #' @importFrom utils read.table
 #' @export
 #' 
-CLSPT <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
+CSESA <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
     if (is.null(in.file1) && is.null(in.file2)) {
         # shiny
         print("No such files!")
@@ -23,21 +23,21 @@ CLSPT <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
     
     InitGlobal()
     
-    clspt.result <- list()
+    csesa.result <- list()
     seq1 <- ReadInFile(in.file1)
     seq2 <- ReadInFile(in.file2)
     
-    clspt.result$spacer1 <- GetAllNewSpacers(seq1)
-    clspt.result$spacer2 <- GetAllNewSpacers(seq2)
+    csesa.result$spacer1 <- GetAllNewSpacers(seq1)
+    csesa.result$spacer2 <- GetAllNewSpacers(seq2)
     
-    clspt.result$serotype <- FindSerotype(clspt.result$spacer1, clspt.result$spacer2)
-    class(clspt) <- "CSESA"
+    csesa.result$serotype <- FindSerotype(csesa.result$spacer1, csesa.result$spacer2)
+    class(csesa) <- "CSESA"
     
     if (is.null(out.file)) {
-        PrintClspt(clspt.result)
+        PrintClspt(csesa.result)
     }
     else {
-        save(clspt.result, file = out.file)
+        save(csesa.result, file = out.file)
     }
 }
 
@@ -70,28 +70,28 @@ GetAllNewSpacers <- function(molecular.seq = NULL) {
 
 #' Find the serotype based on the analysis of the new spacers.
 #'
-#' @param clspt1 the new spacers of the first sequence
-#' @param clspt2 the new spacers of the second sequence
+#' @param csesa1 the new spacers of the first sequence
+#' @param csesa2 the new spacers of the second sequence
 #' 
 #' @return the data frame which reprents the serotype
 #'
-FindSerotype <- function(clspt1 = NA, clspt2 = NA) {
-    if (is.na(clspt1) == TRUE && is.na(clspt2) == TRUE) {
+FindSerotype <- function(csesa1 = NA, csesa2 = NA) {
+    if (is.na(csesa1) == TRUE && is.na(csesa2) == TRUE) {
         print("Sorry. We did not find any corresponding serotype in the lib!")
         exit()
     }
     V1 = V2 = V3 = V4 = NULL
-    if (is.na(clspt1) == TRUE || is.na(clspt2) == TRUE) {
-        clspt <- clspt1
-        if (is.na(clspt1))
-            clspt <- clspt2
-        serotype <- subset(mapping.table.global, is.element(V1, clspt) | is.element(V2, clspt), select = V3)
+    if (is.na(csesa1) == TRUE || is.na(csesa2) == TRUE) {
+        csesa <- csesa1
+        if (is.na(csesa1))
+            csesa <- csesa2
+        serotype <- subset(mapping.table.global, is.element(V1, csesa) | is.element(V2, csesa), select = V3)
         if (nrow(serotype) > 1)
             serotype <- unique(serotype)
     }
     else {
-        serotype <- subset(mapping.table.global, is.element(V1, clspt1) & is.element(V2, clspt2) | 
-                   is.element(V1, clspt2) & is.element(V2, clspt1), select = c(V3, V4))
+        serotype <- subset(mapping.table.global, is.element(V1, csesa1) & is.element(V2, csesa2) | 
+                   is.element(V1, csesa2) & is.element(V2, csesa1), select = c(V3, V4))
     }
     return (serotype)
 }
@@ -145,28 +145,28 @@ GetNewSpacer <- function(molecular.seq = NULL) {
 
 #' Print the result which is got from CSESA
 #'
-#' @param  clspt the S3 object CSESA
+#' @param  csesa the S3 object CSESA
 #'
-PrintClspt <- function(clspt) {
-    if (is.null(clspt)) {
-        print("The clspt object should be set!")
+PrintClspt <- function(csesa) {
+    if (is.null(csesa)) {
+        print("The csesa object should be set!")
         exit()
     }
     
-    print(paste("The new spacer in CRISPR1:", clspt$spacer1))
-    print(paste("The new spacer in CRISPR2:", clspt$spacer2))
+    print(paste("The new spacer in first sequence:", csesa$spacer1))
+    print(paste("The new spacer in second sequence:", csesa$spacer2))
     
-    if (is.na(clspt$spacer1) || is.na(clspt$spacer2)) {
+    if (is.na(csesa$spacer1) || is.na(csesa$spacer2)) {
         result <- ""
-        if (is.atomic(clspt$serotype))
-            result <- clspt$serotype
+        if (is.atomic(csesa$serotype))
+            result <- csesa$serotype
         else 
-            result <- paste(clspt$serotype[, 1], collapse = "] [")
+            result <- paste(csesa$serotype[, 1], collapse = "] [")
         result <- paste("The possible serotype: [", result, sep = "")
         print(paste(result, "]", sep = ""))
     }
     else {
-        result <- paste(clspt$serotype[, 1], clspt$serotype[, 2])
+        result <- paste(csesa$serotype[, 1], csesa$serotype[, 2])
         result <- paste("The possible serotype: [", paste(result, collapse = "] ["), sep = "")
         print(paste(result, "]", sep = ""))
     }
@@ -215,12 +215,12 @@ exit <- function() {
 #' importFrom("utils", "read.table")
 #' 
 InitGlobal <- function() {
-    map.file <- "E:/code/CSESA/inst/extdata/mapping_tbl.txt"
-    # map.file <- system.file("extdata", "mapping_tbl.txt", package = "CSESA")
-    DR.file <- "E:/code/CSESA/inst/extdata/DR_tbl.txt"
-    # DR.file <- system.file("extdata", "DR_tbl.txt", package = "CSESA")
-    spacer.file <- "E:/code/CSESA/inst/extdata/spacer_tbl.txt"
-    # spacer.file <- system.file("extdata", "spacer_tbl.txt", package = "CSESA")
+    # map.file <- "E:/code/CSESA/inst/extdata/mapping_tbl.txt"
+    map.file <- system.file("extdata", "mapping_tbl.txt", package = "CSESA")
+    # DR.file <- "E:/code/CSESA/inst/extdata/DR_tbl.txt"
+    DR.file <- system.file("extdata", "DR_tbl.txt", package = "CSESA")
+    # spacer.file <- "E:/code/CSESA/inst/extdata/spacer_tbl.txt"
+    spacer.file <- system.file("extdata", "spacer_tbl.txt", package = "CSESA")
 
     if (exists("mapping.table.global") == FALSE)
         mapping.table.global <<- read.table(map.file, sep = "\t")
