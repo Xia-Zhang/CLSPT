@@ -16,11 +16,13 @@
 CLSPT <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
     if (is.null(in.file1) && is.null(in.file2)) {
         # shiny
-        stop("No such files!")
+        print("No such files!")
+        exit()
     }
+    
     InitGlobal()
+    
     clspt.result <- list()
-    # CLSPT("./testdata/1.fasta", "./testdata/2.fasta")
     seq1 <- ReadInFile(in.file1)
     seq2 <- ReadInFile(in.file2)
     
@@ -29,16 +31,6 @@ CLSPT <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
     
     clspt.result$serotype <- FindSerotype(clspt.result$spacer1, clspt.result$spacer2)
     
-    #     print(clspt.result)
-    #     exit(0)
-    #     subset1 <- GetMapIterm(in.file1)
-    #     subset2 <- GetMapIterm(in.file2)
-    #     data.result <- merge(subset1, subset2)
-    #     if (nrow(subset1) == nrow(mapping.table.global) && nrow(subset2) == nrow(mapping.table.global) 
-    #         || nrow(data.result) == 0) {
-    #         print("Sorry. We did not find any corresponding serotype in the lib.")
-    #         return (NULL)
-    #     }
     if (is.null(out.file)) {
         PrintClspt(clspt.result)
     }
@@ -47,7 +39,7 @@ CLSPT <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
     }
 }
 
-#' Return the mapping interval_seq_ID
+#' Get the new spacers from the molecular sequence and its 
 #'
 #' @param file.name the input file name
 #' @return the subset framedata which include the input new spacer code of the sequence or the reverse complement sequence
@@ -56,35 +48,9 @@ CLSPT <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
 #' @example
 #' GetMapIterm("./testdata/1.fasta")
 #'
-GetMapIterm <- function(file.name = NULL) {
-    if (is.null(file.name))
-        return (mapping.table.global)
-    molecular.seq <- ReadInFile(file.name)
-    molecular.seq.rev <- GetReverseComplement(molecular.seq)
-    if (is.null(molecular.seq))
-        return (mapping.table.global)
-    new.spacer <- GetNewSpacerCode(molecular.seq)
-    new.spacer.rev <- GetNewSpacerCode(molecular.seq.rev)
-    new.spacer.arr <- character()
-    if (is.null(new.spacer) == FALSE && is.na(new.spacer) == FALSE)
-        new.spacer.arr <- c(new.spacer.arr, new.spacer)
-    if (is.null(new.spacer.rev) == FALSE && is.na(new.spacer.rev) == FALSE)
-        new.spacer.arr <- c(new.spacer.arr, new.spacer.rev)
-    if (length(new.spacer.arr) == 0) {
-        print("The new spacer in CRISPR: (NA)")
-        return (mapping.table.global)
-    }
-    else {
-      new.str = paste(new.spacer.arr, collapse = " ")
-      print(paste("The new spacer in CRISPR:", new.str))
-    }
-    V1 = V2 = NULL
-    subset(mapping.table.global, is.element(V1, new.spacer.arr) | is.element(V2, new.spacer.arr))
-}
-
-
+#'
 GetAllNewSpacers <- function(molecular.seq = NULL) {
-    if (is.null(molecular.seq) || molecular.seq == "") 
+    if (is.null(molecular.seq) || is.na(molecular.seq) || molecular.seq == "") 
         return (NA)
     molecular.seq.rev <- GetReverseComplement(molecular.seq)
     new.spacer <- GetNewSpacerCode(molecular.seq)
@@ -102,7 +68,8 @@ GetAllNewSpacers <- function(molecular.seq = NULL) {
 
 FindSerotype <- function(clspt1 = NA, clspt2 = NA) {
     if (is.na(clspt1) == TRUE && is.na(clspt2) == TRUE) {
-        stop("Sorry. We did not find any corresponding serotype in the lib!")
+        print("Sorry. We did not find any corresponding serotype in the lib!")
+        exit()
     }
     V1 = V2 = V3 = V4 = NULL
     if (is.na(clspt1) == TRUE || is.na(clspt2) == TRUE) {
@@ -110,7 +77,8 @@ FindSerotype <- function(clspt1 = NA, clspt2 = NA) {
         if (is.na(clspt1))
             clspt <- clspt2
         serotype <- subset(mapping.table.global, is.element(V1, clspt) | is.element(V2, clspt), select = V3)
-        serotype <- serotype[duplicated(serotype), ]
+        if (nrow(serotype) > 1)
+            serotype <- unique(serotype)
     }
     else {
         serotype <- subset(mapping.table.global, is.element(V1, clspt1) & is.element(V2, clspt2) | 
@@ -122,7 +90,7 @@ FindSerotype <- function(clspt1 = NA, clspt2 = NA) {
 #' Get the new spacer from the molecular sequence and map it to the code
 #'
 #' @param molecular.seq the molecular sequence
-#' @return the string which is the new spacer code\
+#' @return the string which is the new spacer code
 #'
 GetNewSpacerCode <- function(molecular.seq = NULL) {
     if (is.null(molecular.seq))
@@ -191,14 +159,20 @@ FindNewSpacer <- function(molecular.seq = NULL) {
 
 PrintClspt <- function(clspt) {
     if (is.null(clspt)) {
-        stop("The clspt object should be set!")
+        print("The clspt object should be set!")
+        exit()
     }
     
     print(paste("The new spacer in CRISPR1:", clspt$spacer1))
     print(paste("The new spacer in CRISPR2:", clspt$spacer2))
     
     if (is.na(clspt$spacer1) || is.na(clspt$spacer2)) {
-        result <- paste("The possible serotype: [", paste(clspt$serotype[, 1], collapse = "] ["), sep = "")
+        result <- ""
+        if (is.atomic(clspt$serotype))
+            result <- clspt$serotype
+        else 
+            result <- paste(clspt$serotype[, 1], collapse = "] [")
+        result <- paste("The possible serotype: [", result, sep = "")
         print(paste(result, "]", sep = ""))
     }
     else {
@@ -214,22 +188,18 @@ PrintClspt <- function(clspt) {
 #' @return the string which represents the molecular sequence
 #'
 ReadInFile <- function(file.name) {
-    data <- readLines(file.name)
+    if (is.null(file.name) || is.na(file.name))
+        return (NA)
+    if (file.exists(file.name) == FALSE) {
+        print(paste0(file.name, " is not existed!"))
+        exit()
+    }
+    data <- scan(file.name, what = "", quiet = TRUE)
     if (substring(data[1], 1, 1) == '>')
         data <- data[-1]
     toupper(paste(data, collapse = ""))
 }
 
-#' Read the file and get the reverse complement
-#'
-#' @param file.name the input file name
-#' @return the vector combined with the original string and the reverse complement
-#'
-ReadInFileConvert <- function(file.name) {
-    str <- ReadInFile(file.name)
-    str.rev <- GetReverseComplement(str)
-    c(str, str.rev)
-}
 
 #' Return the reverse complement of the sequence
 #'
@@ -241,16 +211,20 @@ GetReverseComplement <- function(x) {
     paste(rev(substring(a, 1 : nchar(a), 1 : nchar(a))), collapse = "")
 }
 
+exit <- function() {
+    .Internal(.invokeRestart(list(NULL, NULL), NULL))
+}
+
 
 #' Setting the global varible reading from files
 #' importFrom("utils", "read.table")
 InitGlobal <- function() {
-    # map.file <- "./inst/extdata/mapping_tbl.txt"
-    map.file <- system.file("extdata", "mapping_tbl.txt", package = "CSESA")
-    # DR.file <- "./inst/extdata/DR_tbl.txt"
-    DR.file <- system.file("extdata", "DR_tbl.txt", package = "CSESA")
-    # spacer.file <- "./inst/extdata/spacer_tbl.txt"
-    spacer.file <- system.file("extdata", "spacer_tbl.txt", package = "CSESA")
+    map.file <- "E:/code/CSESA/inst/extdata/mapping_tbl.txt"
+    # map.file <- system.file("extdata", "mapping_tbl.txt", package = "CSESA")
+    DR.file <- "E:/code/CSESA/inst/extdata/DR_tbl.txt"
+    # DR.file <- system.file("extdata", "DR_tbl.txt", package = "CSESA")
+    spacer.file <- "E:/code/CSESA/inst/extdata/spacer_tbl.txt"
+    # spacer.file <- system.file("extdata", "spacer_tbl.txt", package = "CSESA")
 
     if (exists("mapping.table.global") == FALSE)
         mapping.table.global <<- read.table(map.file, sep = "\t")
