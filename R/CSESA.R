@@ -31,7 +31,7 @@ CSESA <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
     csesa.result$spacer2 <- GetAllNewSpacers(seq2)
     
     csesa.result$serotype <- FindSerotype(csesa.result$spacer1, csesa.result$spacer2)
-    class(csesa) <- "CSESA"
+    class(csesa.result) <- "CSESA"
     
     if (is.null(out.file)) {
         PrintClspt(csesa.result)
