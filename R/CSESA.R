@@ -13,6 +13,7 @@
 #'
 #' @importFrom utils read.table
 #' @export
+#' 
 CLSPT <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
     if (is.null(in.file1) && is.null(in.file2)) {
         # shiny
@@ -30,6 +31,7 @@ CLSPT <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
     clspt.result$spacer2 <- GetAllNewSpacers(seq2)
     
     clspt.result$serotype <- FindSerotype(clspt.result$spacer1, clspt.result$spacer2)
+    class(clspt) <- "CSESA"
     
     if (is.null(out.file)) {
         PrintClspt(clspt.result)
@@ -39,15 +41,14 @@ CLSPT <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
     }
 }
 
-#' Get the new spacers from the molecular sequence and its 
+#' Get the new spacers from the molecular sequence and its reverse complement sequence
 #'
-#' @param file.name the input file name
-#' @return the subset framedata which include the input new spacer code of the sequence or the reverse complement sequence
+#' @param molecular.seq the molecular sequence
+#' @return The vector of the new spacers, which is extracted from the molecular sequence and its reverse complement sequence
 #'
 #' @note if there doesn't exist any new spacer, the function would return the whole mapping table.
 #' @example
-#' GetMapIterm("./testdata/1.fasta")
-#'
+#' GetAllNewSpacers("GCGCCGGGAACACCAACGTCGGTTTATCCCCGCTGGCGCCGGGAACACAGGCGGACCGAAAAACCGTTTTCAGCCAACGTCGGTTTATCCCCGCTGGCGCCGGGAACACCAACGTCGGTTT")
 #'
 GetAllNewSpacers <- function(molecular.seq = NULL) {
     if (is.null(molecular.seq) || is.na(molecular.seq) || molecular.seq == "") 
@@ -66,6 +67,14 @@ GetAllNewSpacers <- function(molecular.seq = NULL) {
     else return (new.spacer.arr)
 }
 
+
+#' Find the serotype based on the analysis of the new spacers.
+#'
+#' @param clspt1 the new spacers of the first sequence
+#' @param clspt2 the new spacers of the second sequence
+#' 
+#' @return the data frame which reprents the serotype
+#'
 FindSerotype <- function(clspt1 = NA, clspt2 = NA) {
     if (is.na(clspt1) == TRUE && is.na(clspt2) == TRUE) {
         print("Sorry. We did not find any corresponding serotype in the lib!")
@@ -108,7 +117,7 @@ GetNewSpacerCode <- function(molecular.seq = NULL) {
 #' @return the string which is the new spacer
 #'
 #' @example
-#' GetNewSpacer(GCGCCGGGAACACCAACGTCGGTTTATCCCCGCTGGCGCCGGGAACACAGGCGGACCGAAAAACCGTTTTCAGCCAACGTCGGTTTATCCCCGCTGGCGCCGGGAACACCAACGTCGGTTT)
+#' GetNewSpacer("GCGCCGGGAACACCAACGTCGGTTTATCCCCGCTGGCGCCGGGAACACAGGCGGACCGAAAAACCGTTTTCAGCCAACGTCGGTTTATCCCCGCTGGCGCCGGGAACACCAACGTCGGTTT")
 #'
 #' @export
 GetNewSpacer <- function(molecular.seq = NULL) {
@@ -133,30 +142,11 @@ GetNewSpacer <- function(molecular.seq = NULL) {
     spacers[length(spacers) - 1]
 }
 
-#' Check if the new spacer exist in the sequence
-#'
-#' @param molecular.seq the input sequence
-#' @return TRUE or FALSE to represent the existance
-#'
-FindNewSpacer <- function(molecular.seq = NULL) {
-    if (is.null(molecular.seq))
-        return (FALSE)
-    max.match <- "-"
-    max.count <- -1
-    for (x in dr.table.global$V3[-1]) {
-        t <- gregexpr(pattern = x, text = molecular.seq)
-        if (t[[1]][1] != -1 && length(t[[1]]) > max.count) {
-            max.match = x
-            max.count = length(t[[1]])
-        }
-    }
-    if (max.count < 1)
-        return (FALSE)
-    spacers <- strsplit(molecular.seq, max.match)[[1]]
-    new.spacer <- spacers[length(spacers) - 1]
-    return (is.element(new.spacer, spacers.table.global$V3))
-}
 
+#' Print the result which is got from CSESA
+#'
+#' @param  clspt the S3 object CSESA
+#'
 PrintClspt <- function(clspt) {
     if (is.null(clspt)) {
         print("The clspt object should be set!")
@@ -181,6 +171,7 @@ PrintClspt <- function(clspt) {
         print(paste(result, "]", sep = ""))
     }
 }
+
 
 #' Read the three types of input file
 #'
@@ -211,13 +202,18 @@ GetReverseComplement <- function(x) {
     paste(rev(substring(a, 1 : nchar(a), 1 : nchar(a))), collapse = "")
 }
 
+
+#' The exit function which help to exit from the script
+#' 
 exit <- function() {
     .Internal(.invokeRestart(list(NULL, NULL), NULL))
 }
 
 
 #' Setting the global varible reading from files
+#' 
 #' importFrom("utils", "read.table")
+#' 
 InitGlobal <- function() {
     map.file <- "E:/code/CSESA/inst/extdata/mapping_tbl.txt"
     # map.file <- system.file("extdata", "mapping_tbl.txt", package = "CSESA")
