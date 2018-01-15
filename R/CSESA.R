@@ -1,12 +1,12 @@
-#' CSESA (CRISPR-based Salmonella enterica Serotype Analyzer)
+#' CSESA (CRISPR-based Salmonella enterica Serotype Analyzer).
 #'
-#' @description The main function in CSESA package
+#' @description The main function in CSESA package.
 #'
-#' @param in.file1 one of the input sequence file, the default value is NULL.
-#' @param in.file2 the other one of the input sequence file, the default value is NULL.
-#' @param out.file the file where the result will save. If not set the value, the result will show in the screen.
+#' @param in.file1 The first input file, the default value is NULL.
+#' @param in.file2 The second input file (optional), the default value is NULL.
+#' @param out.file Into which results will be saved if this value is set. Otherwise results will be displayed on the screen.
 #'
-#' @return the subset framedata which indicate the predictation of salmonella.
+#' @return The subset framedata which indicate the predicted serotype of salmonella.
 #'
 #' @example
 #'  CSESA("./testdata/1.fasta", "./testdata/2.fasta")
@@ -41,12 +41,12 @@ CSESA <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
     }
 }
 
-#' Get the new spacers from the molecular sequence and its reverse complement sequence
+#' Get the new spacers from the molecular sequence and its reverse complement.
 #'
-#' @param molecular.seq the molecular sequence
-#' @return The vector of the new spacers, which is extracted from the molecular sequence and its reverse complement sequence
+#' @param molecular.seq The molecular sequence.
+#' @return The vector of the new spacers, which is extracted from the molecular sequence and its reverse complement.
 #'
-#' @note if there doesn't exist any new spacer, the function would return the whole mapping table.
+#' @note If there doesn't exist any new spacer, the function would return the whole mapping table.
 #' @example
 #' GetAllNewSpacers("GCGCCGGGAACACCAACGTCGGTTTATCCCCGCTGGCGCCGGGAACACAGGCGGACCGAAAAACCGTTTTCAGCCAACGTCGGTTTATCCCCGCTGGCGCCGGGAACACCAACGTCGGTTT")
 #'
@@ -70,10 +70,10 @@ GetAllNewSpacers <- function(molecular.seq = NULL) {
 
 #' Find the serotype based on the analysis of the new spacers.
 #'
-#' @param csesa1 the new spacers of the first sequence
-#' @param csesa2 the new spacers of the second sequence
+#' @param csesa1 The new spacer of the first sequence.
+#' @param csesa2 The new spacer of the second sequence.
 #' 
-#' @return the data frame which reprents the serotype
+#' @return The data frame which represents the serotype.
 #'
 FindSerotype <- function(csesa1 = NA, csesa2 = NA) {
     if (is.na(csesa1) == TRUE && is.na(csesa2) == TRUE) {
@@ -96,10 +96,10 @@ FindSerotype <- function(csesa1 = NA, csesa2 = NA) {
     return (serotype)
 }
 
-#' Get the new spacer from the molecular sequence and map it to the code
+#' Get the new spacer from the molecular sequence and map it to the code.
 #'
-#' @param molecular.seq the molecular sequence
-#' @return the string which is the new spacer code
+#' @param molecular.seq The molecular sequence.
+#' @return The new spacer code as a string.
 #'
 GetNewSpacerCode <- function(molecular.seq = NULL) {
     if (is.null(molecular.seq))
@@ -111,10 +111,10 @@ GetNewSpacerCode <- function(molecular.seq = NULL) {
 }
 
 
-#' Get the new spacer from the molecular sequence
+#' Get the new spacer from the molecular sequence.
 #'
-#' @param molecular.seq the molecular sequence
-#' @return the string which is the new spacer
+#' @param molecular.seq The molecular sequence.
+#' @return The new spacer sequence as a string.
 #'
 #' @example
 #' GetNewSpacer("GCGCCGGGAACACCAACGTCGGTTTATCCCCGCTGGCGCCGGGAACACAGGCGGACCGAAAAACCGTTTTCAGCCAACGTCGGTTTATCCCCGCTGGCGCCGGGAACACCAACGTCGGTTT")
@@ -143,9 +143,9 @@ GetNewSpacer <- function(molecular.seq = NULL) {
 }
 
 
-#' Print the result which is got from CSESA
+#' Print the result of CSESA.
 #'
-#' @param  csesa the S3 object CSESA
+#' @param  csesa The S3 object CSESA.
 #'
 PrintClspt <- function(csesa) {
     if (is.null(csesa)) {
@@ -153,8 +153,8 @@ PrintClspt <- function(csesa) {
         exit()
     }
     
-    print(paste("The new spacer in first sequence:", csesa$spacer1))
-    print(paste("The new spacer in second sequence:", csesa$spacer2))
+    print(paste("The new spacer in the first sequence:", csesa$spacer1))
+    print(paste("The new spacer in the second sequence:", csesa$spacer2))
     
     if (is.na(csesa$spacer1) || is.na(csesa$spacer2)) {
         result <- ""
@@ -173,10 +173,10 @@ PrintClspt <- function(csesa) {
 }
 
 
-#' Read the three types of input file
+#' Read the three types of input file.
 #'
-#' @param file.name the input file name
-#' @return the string which represents the molecular sequence
+#' @param file.name The input file name.
+#' @return The molecular sequence as a string.
 #'
 ReadInFile <- function(file.name) {
     if (is.null(file.name) || is.na(file.name))
@@ -192,10 +192,10 @@ ReadInFile <- function(file.name) {
 }
 
 
-#' Return the reverse complement of the sequence
+#' Return the reverse complement of the sequence.
 #'
-#' @param x the input sequence
-#' @return the reverse complement sequence string
+#' @param x The input sequence.
+#' @return The reverse complement sequence as a string.
 #'
 GetReverseComplement <- function(x) {
     a <- chartr("ATGC","TACG",x)
@@ -210,7 +210,7 @@ exit <- function() {
 }
 
 
-#' Setting the global varible reading from files
+#' Set the global varibles reading from files.
 #' 
 #' importFrom("utils", "read.table")
 #' 
@@ -228,5 +228,4 @@ InitGlobal <- function() {
         dr.table.global <<- read.table(DR.file)
     if (exists("spacers.table.global") == FALSE)
         spacers.table.global <<- read.table(spacer.file)
-
 }
