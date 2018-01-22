@@ -1,10 +1,12 @@
 Package: CSESA
 Type: Package
 Title: CSESA
-Version: 0.1.0
-Author: Xia Zhang
+Version: 0.1.1
+Author: Authors@R: c(
+    person("Xia", "Zhang", role = c("aut", "cre"), email = "zhangxia9403@gmail.com"),
+    person("Lang", "Yang", role = "aut", email = "ylang1992@126.com"))
 Maintainer: Xia Zhang <zhangxia9403@gmail.com>
-Description: Clustered regularly interspaced short palindromic repeats locus spacer pair typing method for salmonella.
+Description: Clustered regularly interspaced short palindromic repeats locus spacer pair typing based Salmonella enterica Serotype Analyzer.
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true

@@ -8,20 +8,18 @@
 #'
 #' @return The subset framedata which indicate the predicted serotype of salmonella.
 #'
-#' @example
-#'  CSESA("./testdata/1.fasta", "./testdata/2.fasta")
-#'
+#' @examples
+#' \dontrun{
+#'   CSESA("./testdata/1.fasta", "./testdata/2.fasta")
+#' }
 #' @importFrom utils read.table
 #' @export
 #' 
 CSESA <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
     if (is.null(in.file1) && is.null(in.file2)) {
         # shiny
-        print("No such files!")
-        exit()
+        stop("No such files!")
     }
-    
-    InitGlobal()
     
     csesa.result <- list()
     seq1 <- ReadInFile(in.file1)
@@ -47,8 +45,6 @@ CSESA <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL) {
 #' @return The vector of the new spacers, which is extracted from the molecular sequence and its reverse complement.
 #'
 #' @note If there doesn't exist any new spacer, the function would return the whole mapping table.
-#' @example
-#' GetAllNewSpacers("GCGCCGGGAACACCAACGTCGGTTTATCCCCGCTGGCGCCGGGAACACAGGCGGACCGAAAAACCGTTTTCAGCCAACGTCGGTTTATCCCCGCTGGCGCCGGGAACACCAACGTCGGTTT")
 #'
 GetAllNewSpacers <- function(molecular.seq = NULL) {
     if (is.null(molecular.seq) || is.na(molecular.seq) || molecular.seq == "") 
@@ -77,20 +73,20 @@ GetAllNewSpacers <- function(molecular.seq = NULL) {
 #'
 FindSerotype <- function(csesa1 = NA, csesa2 = NA) {
     if (is.na(csesa1) == TRUE && is.na(csesa2) == TRUE) {
-        print("Sorry. We did not find any corresponding serotype in the lib!")
-        exit()
+        stop("Sorry. We did not find any corresponding serotype in the lib!")
     }
     V1 = V2 = V3 = V4 = NULL
+    mapping.table <- read.table(system.file("extdata", "mapping_tbl.txt", package = "CSESA"), sep = "\t")
     if (is.na(csesa1) == TRUE || is.na(csesa2) == TRUE) {
         csesa <- csesa1
         if (is.na(csesa1))
             csesa <- csesa2
-        serotype <- subset(mapping.table.global, is.element(V1, csesa) | is.element(V2, csesa), select = V3)
+        serotype <- subset(mapping.table, is.element(V1, csesa) | is.element(V2, csesa), select = V3)
         if (nrow(serotype) > 1)
             serotype <- unique(serotype)
     }
     else {
-        serotype <- subset(mapping.table.global, is.element(V1, csesa1) & is.element(V2, csesa2) | 
+        serotype <- subset(mapping.table, is.element(V1, csesa1) & is.element(V2, csesa2) | 
                    is.element(V1, csesa2) & is.element(V2, csesa1), select = c(V3, V4))
     }
     return (serotype)
@@ -107,7 +103,9 @@ GetNewSpacerCode <- function(molecular.seq = NULL) {
     new.spacer <- GetNewSpacer(molecular.seq)
     if (is.null(new.spacer))
         return (NULL)
-    spacer.char <- as.character(subset(spacers.table.global, V3 == new.spacer, select = V1)[1, 1])
+    V1 = V3 = NULL
+    spacers.table <- read.table(system.file("extdata", "spacer_tbl.txt", package = "CSESA"))
+    spacer.char <- as.character(subset(spacers.table, V3 == new.spacer, select = V1)[1, 1])
 }
 
 
@@ -116,17 +114,17 @@ GetNewSpacerCode <- function(molecular.seq = NULL) {
 #' @param molecular.seq The molecular sequence.
 #' @return The new spacer sequence as a string.
 #'
-#' @example
-#' GetNewSpacer("GCGCCGGGAACACCAACGTCGGTTTATCCCCGCTGGCGCCGGGAACACAGGCGGACCGAAAAACCGTTTTCAGCCAACGTCGGTTTATCCCCGCTGGCGCCGGGAACACCAACGTCGGTTT")
+#' @examples
+#' GetNewSpacer("AGAGGCGGACCGAAAAACCGTTTTCAGCCAACGTAT")
 #'
 #' @export
 GetNewSpacer <- function(molecular.seq = NULL) {
     if (is.null(molecular.seq))
         return (NULL)
-    InitGlobal()
     max.match <- "-"
     max.count <- -1
-    for (x in dr.table.global$V3[-1]) {
+    dr.table <- read.table(system.file("extdata", "DR_tbl.txt", package = "CSESA"))
+    for (x in dr.table$V3[-1]) {
         t <- gregexpr(pattern = x, text = molecular.seq)
         if (t[[1]][1] != -1 && length(t[[1]]) > max.count) {
             max.match = x
@@ -149,8 +147,7 @@ GetNewSpacer <- function(molecular.seq = NULL) {
 #'
 PrintClspt <- function(csesa) {
     if (is.null(csesa)) {
-        print("The csesa object should be set!")
-        exit()
+        stop("The csesa object should be set!")
     }
     
     print(paste("The new spacer in the first sequence:", csesa$spacer1))
@@ -182,8 +179,7 @@ ReadInFile <- function(file.name) {
     if (is.null(file.name) || is.na(file.name))
         return (NA)
     if (file.exists(file.name) == FALSE) {
-        print(paste0(file.name, " is not existed!"))
-        exit()
+        stop(paste0(file.name, " is not existed!"))
     }
     data <- scan(file.name, what = "", quiet = TRUE)
     if (substring(data[1], 1, 1) == '>')
@@ -200,32 +196,4 @@ ReadInFile <- function(file.name) {
 GetReverseComplement <- function(x) {
     a <- chartr("ATGC","TACG",x)
     paste(rev(substring(a, 1 : nchar(a), 1 : nchar(a))), collapse = "")
-}
-
-
-#' The exit function which help to exit from the script
-#' 
-exit <- function() {
-    .Internal(.invokeRestart(list(NULL, NULL), NULL))
-}
-
-
-#' Set the global varibles reading from files.
-#' 
-#' importFrom("utils", "read.table")
-#' 
-InitGlobal <- function() {
-    # map.file <- "E:/code/CSESA/inst/extdata/mapping_tbl.txt"
-    map.file <- system.file("extdata", "mapping_tbl.txt", package = "CSESA")
-    # DR.file <- "E:/code/CSESA/inst/extdata/DR_tbl.txt"
-    DR.file <- system.file("extdata", "DR_tbl.txt", package = "CSESA")
-    # spacer.file <- "E:/code/CSESA/inst/extdata/spacer_tbl.txt"
-    spacer.file <- system.file("extdata", "spacer_tbl.txt", package = "CSESA")
-
-    if (exists("mapping.table.global") == FALSE)
-        mapping.table.global <<- read.table(map.file, sep = "\t")
-    if (exists("patterns.table.global") == FALSE)
-        dr.table.global <<- read.table(DR.file)
-    if (exists("spacers.table.global") == FALSE)
-        spacers.table.global <<- read.table(spacer.file)
 }
