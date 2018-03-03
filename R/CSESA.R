@@ -15,7 +15,7 @@
 #' @importFrom utils read.table
 #' @export
 #' 
-CSESA <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL, method = "PCR") {
+CSESA <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL, method = c("PCR", "WGS")) {
     tryCatch({
         if (is.null(in.file1) && is.null(in.file2)) {
             stop("No such files!")
@@ -23,25 +23,36 @@ CSESA <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL, method = "P
         method <- toupper(method)
         method <- match.arg(method)
         
-        csesa.result <- list()
-        seq1 <- ReadInFile(in.file1)
-        seq2 <- ReadInFile(in.file2)
-        
-        csesa.result$spacer1 <- GetAllNewSpacers(seq1)
-        csesa.result$spacer2 <- GetAllNewSpacers(seq2)
-        
-        csesa.result$serotype <- FindSerotype(csesa.result$spacer1, csesa.result$spacer2)
-        class(csesa.result) <- "CSESA"
-        
-        if (is.null(out.file)) {
-            PrintClspt(csesa.result)
+        if (method == "PCR") {
+            seq1 <- ReadInFile(in.file1)
+            seq2 <- ReadInFile(in.file2)
+            PCR(seq1, seq2, out.file)
         }
         else {
-            save(csesa.result, file = out.file)
+            # WGS
         }
+        
     }, error = function(e) {
         cat("ERROR :",conditionMessage(e),"\n")
     })
+}
+
+
+PCR <- function(seq1, seq2, out.file) {
+    csesa.result <- list()
+    
+    csesa.result$spacer1 <- GetAllNewSpacers(seq1)
+    csesa.result$spacer2 <- GetAllNewSpacers(seq2)
+    
+    csesa.result$serotype <- FindSerotype(csesa.result$spacer1, csesa.result$spacer2)
+    class(csesa.result) <- "CSESA"
+    
+    if (is.null(out.file)) {
+        PrintClspt(csesa.result)
+    }
+    else {
+        save(csesa.result, file = out.file)
+    }
 }
 
 #' Get the new spacers from the molecular sequence and its reverse complement.
