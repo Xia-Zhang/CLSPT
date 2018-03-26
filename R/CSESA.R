@@ -8,6 +8,8 @@
 #' @param method The method to handle the input file(s), can only be "PCR" or "WGS".
 #'
 #' @return The subset framedata which indicate the predicted serotype of salmonella.
+#' 
+#' @note If you use the "WGS" method, please make sure you have install the BLAST software.
 #'
 #' @examples
 #' \dontrun{
@@ -30,6 +32,8 @@ CSESA <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL, method = c(
             PCR(seq1, seq2, out.file)
         }
         else {
+            # read WGS
+            # different, shouldn't union
             # WGS
         }
         
@@ -56,6 +60,37 @@ PCR <- function(seq1, seq2, out.file) {
     }
 }
 
+WGS <- function(data) {
+    path <- Sys.which("blastn")
+    if (all(path == "")) {
+        stop("Blast is not exist!")
+    }
+    
+    # loading the database
+    db <- ""
+    blastcmd <- Sys.which("blastdbcmd")
+    
+    tmpwd <- tempdir()
+    curwd <- getwd()
+    tmp.prefix <- basename(tempfile(tmpdir = wd))
+    on.exit({
+        file.remove(Sys.glob(paste(tmp.prefix, "*")))
+    })
+    
+    infile <- paste(temp_file, ".fasta")
+    outfile <- paste(temp_file, ".out")
+    
+    writeXStringSet(data, infile, append=FALSE, format="fasta")
+    system(paste(blastcmd, "-db", db, "-query", infile, "-out", outfile, "-outfmt 10", "-task blastn-short"), ignore.stdout = TRUE, ignore.stderr = FALSE)
+    
+    result.table <- read.table(outfile, sep=",", quote = "")
+    colnames(result.table) <- c("QueryID",  "SubjectID", "Perc.Ident",
+                                "Alignment.Length", "Mismatches", "Gap.Openings", "Q.start", "Q.end",
+                                "S.start", "S.end", "E", "Bits" )
+    
+    # pick the useful sequence
+}
+
 #' Get the new spacers from the molecular sequence and its reverse complement.
 #'
 #' @param molecular.seq The molecular sequence.
@@ -68,7 +103,7 @@ GetAllNewSpacers <- function(molecular.seq = NULL) {
         return (NA)
     molecular.seq.rev <- GetReverseComplement(molecular.seq)
     
-    # TODO: handle the Typhi special case
+    # handle the Typhi special case
     typhi <- "ACGGCTATCCTTGTTGACGTGGGGAATACTGCTACACGCAAAAATTCCAGTCGTTGGCGCA"
     if (endsWith(molecular.seq, typhi) || endsWith(molecular.seq.rev, typhi))
         return c("EntB0var1")
