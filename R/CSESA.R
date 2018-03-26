@@ -5,6 +5,7 @@
 #' @param in.file1 The first input file, the default value is NULL.
 #' @param in.file2 The second input file (optional), the default value is NULL.
 #' @param out.file Into which results will be saved if this value is set. Otherwise results will be displayed on the screen.
+#' @param method The method to handle the input file(s), can only be "PCR" or "WGS".
 #'
 #' @return The subset framedata which indicate the predicted serotype of salmonella.
 #'
@@ -60,12 +61,18 @@ PCR <- function(seq1, seq2, out.file) {
 #' @param molecular.seq The molecular sequence.
 #' @return The vector of the new spacers, which is extracted from the molecular sequence and its reverse complement.
 #'
-#' @note If there doesn't exist any new spacer, the function would return the whole mapping table.
+#' @note If there doesn't exist any new spacer, the function would return NA.
 #'
 GetAllNewSpacers <- function(molecular.seq = NULL) {
     if (is.null(molecular.seq) || is.na(molecular.seq) || molecular.seq == "") 
         return (NA)
     molecular.seq.rev <- GetReverseComplement(molecular.seq)
+    
+    # TODO: handle the Typhi special case
+    typhi <- "ACGGCTATCCTTGTTGACGTGGGGAATACTGCTACACGCAAAAATTCCAGTCGTTGGCGCA"
+    if (endsWith(molecular.seq, typhi) || endsWith(molecular.seq.rev, typhi))
+        return c("EntB0var1")
+    
     new.spacer <- GetNewSpacerCode(molecular.seq)
     new.spacer.rev <- GetNewSpacerCode(molecular.seq.rev)
     new.spacer.arr <- character()
