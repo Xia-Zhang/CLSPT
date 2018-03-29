@@ -32,9 +32,21 @@ CSESA <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL, method = c(
             PCR(seq1, seq2, out.file)
         }
         else {
-            # read WGS
-            # different, shouldn't union
-            # WGS
+            if (in.file1 != NULL && file.exists(in.file1)) {
+                seq <- readRNAStringSet(in.file1)
+                if (in.file2 != NULL)
+                    print("Warning: the WGS mode would ignore the in.file2 when input two files.")
+            }
+            else if (in.file2 != NULL && file.exists(in.file2)){
+                seq <- readRNAStringSet(in.file2)
+            }
+            else {
+                stop("The input files are not exist!")
+            }
+            wgs.list <- WGS(seq)
+            seq1 <- wgs.list$seq1
+            seq2 <- wgs.list$seq2
+            PCR(seq1, seq2, out.file)
         }
         
     }, error = function(e) {
@@ -67,7 +79,7 @@ WGS <- function(data) {
     }
     
     # loading the database
-    db <- ""
+    db <- system.file("primerDB", package = "CSESA")
     blastcmd <- Sys.which("blastdbcmd")
     
     tmpwd <- tempdir()
@@ -84,11 +96,27 @@ WGS <- function(data) {
     system(paste(blastcmd, "-db", db, "-query", infile, "-out", outfile, "-outfmt 10", "-task blastn-short"), ignore.stdout = TRUE, ignore.stderr = FALSE)
     
     result.table <- read.table(outfile, sep=",", quote = "")
-    colnames(result.table) <- c("QueryID",  "SubjectID", "Perc.Ident",
-                                "Alignment.Length", "Mismatches", "Gap.Openings", "Q.start", "Q.end",
-                                "S.start", "S.end", "E", "Bits" )
+    colnames(result.table) <- c("Query_id",  "Subject_id", "Perc_ident",
+                                "Align_length", "Mismatches", "Gap_openings", "Query_start", "Query_end",
+                                "S_start", "S_end", "E", "Bits" )
     
-    # pick the useful sequence
+    config.primerA2 = result.table[which(result.table$Subject_id == "PrimerA2" && result.table$Align_length == 23), ]
+    config.primerA1 = result.table[which(result.table$Subject_id == "PrimerA1" && result.table$Align_length == 20), ]
+    config.primerB1 = result.table[which(result.table$Subject_id == "PrimerB1" && result.table$Align_length == 25), ]
+    seq1 <- NA
+    seq2 <- NA
+    if (nrow(config.primerA1) == 1 && nrow(config.primerA2) == 1 && config.primerA1$Query_id == config.primerA2$Query_id) {
+        id = config.primerA1$Query_id
+        locus.primerA1 = config.primerA1$Query_start
+        locus.primerA2 = config.primerA2$Query_start
+        seq1 <- substr(data$id, min(locus.primerA1, locus.primerA2), max(locus.primerA1, locus.primerA2))
+    }
+    if (nrow(config.primerB1) == 1) {
+        id = config.primerB1$Query_id
+        locus.primerB1 = config.primerB1$Query_start
+        seq2 <- substr(data$id, locus.primerB1 - 3000, locus.primerB1 + 3000)
+    }
+    return (list(seq1 = seq1, seq2 = seq2))
 }
 
 #' Get the new spacers from the molecular sequence and its reverse complement.
@@ -106,7 +134,7 @@ GetAllNewSpacers <- function(molecular.seq = NULL) {
     # handle the Typhi special case
     typhi <- "ACGGCTATCCTTGTTGACGTGGGGAATACTGCTACACGCAAAAATTCCAGTCGTTGGCGCA"
     if (endsWith(molecular.seq, typhi) || endsWith(molecular.seq.rev, typhi))
-        return c("EntB0var1")
+        return (c("EntB0var1"))
     
     new.spacer <- GetNewSpacerCode(molecular.seq)
     new.spacer.rev <- GetNewSpacerCode(molecular.seq.rev)
