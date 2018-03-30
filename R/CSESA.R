@@ -16,6 +16,8 @@
 #'   CSESA("./testdata/1.fasta", "./testdata/2.fasta")
 #' }
 #' @importFrom utils read.table
+#' @import Biostrings
+#' 
 #' @export
 #' 
 CSESA <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL, method = c("PCR", "WGS")) {
@@ -25,32 +27,30 @@ CSESA <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL, method = c(
         } 
         method <- toupper(method)
         method <- match.arg(method)
-        
         if (method == "PCR") {
             seq1 <- ReadInFile(in.file1)
             seq2 <- ReadInFile(in.file2)
             PCR(seq1, seq2, out.file)
         }
         else {
-            if (in.file1 != NULL && file.exists(in.file1)) {
-                seq <- readRNAStringSet(in.file1)
-                if (in.file2 != NULL)
+            if (is.null(in.file1) == FALSE && file.exists(in.file1)) {
+                file <- in.file1
+                if (is.null(in.file2) == FALSE)
                     print("Warning: the WGS mode would ignore the in.file2 when input two files.")
             }
-            else if (in.file2 != NULL && file.exists(in.file2)){
-                seq <- readRNAStringSet(in.file2)
+            else if (is.null(in.file2) == FALSE && file.exists(in.file2)){
+                file <- in.file2
             }
             else {
                 stop("The input files are not exist!")
             }
-            wgs.list <- WGS(seq)
+            wgs.list <- WGS(file)
             seq1 <- wgs.list$seq1
             seq2 <- wgs.list$seq2
             PCR(seq1, seq2, out.file)
         }
-        
     }, error = function(e) {
-        cat("ERROR :",conditionMessage(e),"\n")
+       cat("ERROR :",conditionMessage(e),"\n")
     })
 }
 
@@ -72,7 +72,7 @@ PCR <- function(seq1, seq2, out.file) {
     }
 }
 
-WGS <- function(data) {
+WGS <- function(file) {
     path <- Sys.which("blastn")
     if (all(path == "")) {
         stop("Blast is not exist!")
@@ -80,41 +80,65 @@ WGS <- function(data) {
     
     # loading the database
     db <- system.file("primerDB", package = "CSESA")
-    blastcmd <- Sys.which("blastdbcmd")
+    db <- file.path("primers")
+    blastn <- Sys.which("blastn")
     
     tmpwd <- tempdir()
     curwd <- getwd()
-    tmp.prefix <- basename(tempfile(tmpdir = wd))
+    tmp.prefix <- basename(tempfile(tmpdir = tmpwd))
     on.exit({
         file.remove(Sys.glob(paste(tmp.prefix, "*")))
+        setwd(curwd)
     })
+    setwd(tmpwd)
     
-    infile <- paste(temp_file, ".fasta")
-    outfile <- paste(temp_file, ".out")
+    outfile <- paste(tmp.prefix, ".out", sep = "")
+    data <- readRNAStringSet(file)
     
-    writeXStringSet(data, infile, append=FALSE, format="fasta")
-    system(paste(blastcmd, "-db", db, "-query", infile, "-out", outfile, "-outfmt 10", "-task blastn-short"), ignore.stdout = TRUE, ignore.stderr = FALSE)
+    # db = "E:/code/CSESA/inst/primerDB/primers"
+    system(paste(blastn, "-db", db, "-query", file, "-out", outfile, "-outfmt 10", "-task blastn-short"), ignore.stdout = FALSE, ignore.stderr = FALSE)
     
     result.table <- read.table(outfile, sep=",", quote = "")
     colnames(result.table) <- c("Query_id",  "Subject_id", "Perc_ident",
                                 "Align_length", "Mismatches", "Gap_openings", "Query_start", "Query_end",
                                 "S_start", "S_end", "E", "Bits" )
     
-    config.primerA2 = result.table[which(result.table$Subject_id == "PrimerA2" && result.table$Align_length == 23), ]
-    config.primerA1 = result.table[which(result.table$Subject_id == "PrimerA1" && result.table$Align_length == 20), ]
-    config.primerB1 = result.table[which(result.table$Subject_id == "PrimerB1" && result.table$Align_length == 25), ]
+    config.primerA2 = result.table[which(result.table$Subject_id == "locusA_primer_R" & result.table$Align_length == 23), ]
+    config.primerA1 = result.table[which(result.table$Subject_id == "locusA_primer_F" & result.table$Align_length == 20), ]
+    config.primerB1 = result.table[which(result.table$Subject_id == "locusB_primer_F" & result.table$Align_length == 25), ]
     seq1 <- NA
     seq2 <- NA
     if (nrow(config.primerA1) == 1 && nrow(config.primerA2) == 1 && config.primerA1$Query_id == config.primerA2$Query_id) {
-        id = config.primerA1$Query_id
+        id <- as.character(config.primerA1$Query_id)
         locus.primerA1 = config.primerA1$Query_start
         locus.primerA2 = config.primerA2$Query_start
-        seq1 <- substr(data$id, min(locus.primerA1, locus.primerA2), max(locus.primerA1, locus.primerA2))
+        seq <- ""
+        idx <- 1
+        # print(str(names(data)))
+        for (tn in names(data)) {
+            if (startsWith(tn, id)) {
+                seq <- as.character(unlist(data[1, ]))
+                break
+            }
+            idx <- idx + 1
+        }
+        seq1 <- substr(seq, min(locus.primerA1, locus.primerA2), max(locus.primerA1, locus.primerA2))
+        print(seq1)
+        
     }
     if (nrow(config.primerB1) == 1) {
-        id = config.primerB1$Query_id
+        id = as.character(config.primerB1$Query_id)
         locus.primerB1 = config.primerB1$Query_start
-        seq2 <- substr(data$id, locus.primerB1 - 3000, locus.primerB1 + 3000)
+        seq <- ""
+        idx <- 1
+        for (tn in names(data)) {
+            if (startsWith(tn, id)) {
+                seq <- as.character(unlist(data[1, ]))
+                break
+            }
+            idx <- idx + 1
+        }
+        seq2 <- substr(seq, locus.primerB1 - 3000, locus.primerB1 + 3000)
     }
     return (list(seq1 = seq1, seq2 = seq2))
 }
