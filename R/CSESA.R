@@ -257,8 +257,8 @@ PrintClspt <- function(csesa) {
         stop("The csesa object should be set!")
     }
     
-    print(paste("The new spacer in the first sequence:", csesa$spacer1))
-    print(paste("The new spacer in the second sequence:", csesa$spacer2))
+    print(paste("The newly incorporated spacer in the first CRISPR sequence: ", csesa$spacer1))
+    print(paste("The newly incorporated spacer in the second CRISPR sequence: ", csesa$spacer2))
     
     if (is.na(csesa$spacer1) || is.na(csesa$spacer2)) {
         result <- ""
@@ -266,12 +266,12 @@ PrintClspt <- function(csesa) {
             result <- csesa$serotype
         else 
             result <- paste(csesa$serotype[, 1], collapse = "] [")
-        result <- paste("The possible serotype: [", result, sep = "")
+        result <- paste("Predicted serotype(s): [", result, sep = "")
         print(paste(result, "]", sep = ""))
     }
     else {
         result <- paste(csesa$serotype[, 1], csesa$serotype[, 2])
-        result <- paste("The possible serotype: [", paste(result, collapse = "] ["), sep = "")
+        result <- paste("Predicted serotype(s): [", paste(result, collapse = "] ["), sep = "")
         print(paste(result, "]", sep = ""))
     }
 }
