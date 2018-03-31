@@ -80,7 +80,7 @@ WGS <- function(file) {
     
     # loading the database
     db <- system.file("primerDB", package = "CSESA")
-    db <- file.path("primers")
+    db <- file.path(db, "primers")
     blastn <- Sys.which("blastn")
     
     tmpwd <- tempdir()
@@ -93,7 +93,7 @@ WGS <- function(file) {
     setwd(tmpwd)
     
     outfile <- paste(tmp.prefix, ".out", sep = "")
-    data <- readRNAStringSet(file)
+    data <- readDNAStringSet(file)
     
     # db = "E:/code/CSESA/inst/primerDB/primers"
     system(paste(blastn, "-db", db, "-query", file, "-out", outfile, "-outfmt 10", "-task blastn-short"), ignore.stdout = FALSE, ignore.stderr = FALSE)
@@ -123,8 +123,6 @@ WGS <- function(file) {
             idx <- idx + 1
         }
         seq1 <- substr(seq, min(locus.primerA1, locus.primerA2), max(locus.primerA1, locus.primerA2))
-        print(seq1)
-        
     }
     if (nrow(config.primerB1) == 1) {
         id = as.character(config.primerB1$Query_id)
