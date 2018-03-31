@@ -6,8 +6,6 @@
 #' @param in.file2 The second input file (optional), the default value is NULL.
 #' @param out.file Into which results will be saved if this value is set. Otherwise results will be displayed on the screen.
 #' @param method The method to handle the input file(s), can only be "PCR" or "WGS".
-#'
-#' @return The S3 obeject with class "CSESA", which indicate the predicted serotype of salmonella.
 #' 
 #' @note If you use the "WGS" method, please make sure you have installed the BLAST software.
 #'
@@ -60,8 +58,6 @@ CSESA <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL, method = c(
 #' @param seq1 The first DNA sequence.
 #' @param seq2 The second DNA sequence.
 #' @param out.file Into which results will be saved if this value is set. Otherwise results will be displayed on the screen.
-#'
-#' @return The S3 obeject with class "CSESA", which indicate the predicted serotype of salmonella.
 #' 
 PCR <- function(seq1, seq2, out.file) {
     csesa.result <- list()
@@ -78,8 +74,6 @@ PCR <- function(seq1, seq2, out.file) {
     else {
         save(csesa.result, file = out.file)
     }
-    
-    csesa.result
 }
 
 
