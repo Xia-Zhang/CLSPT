@@ -69,10 +69,10 @@ PCR <- function(seq1, seq2, out.file) {
     class(csesa.result) <- "CSESA"
     
     if (is.null(out.file)) {
-        PrintClspt(csesa.result)
+        cat(GetStr(csesa.result))
     }
     else {
-        save(csesa.result, file = out.file)
+        write(GetStr(csesa.result), file = out.file)
     }
 }
 
@@ -262,17 +262,18 @@ GetNewSpacer <- function(molecular.seq = NULL) {
 }
 
 
-#' Print the result of CSESA.
+#' Get the information string from the CSESA s3 object.
 #'
-#' @param  csesa The S3 object CSESA.
+#' @param csesa The S3 object CSESA.
+#' @return The string record the newly spacers and serotype information.
 #'
-PrintClspt <- function(csesa) {
+GetStr <- function(csesa) {
     if (is.null(csesa)) {
         stop("The csesa object should be set!")
     }
-    
-    print(paste("The newly incorporated spacer in the first CRISPR sequence: ", csesa$spacer1))
-    print(paste("The newly incorporated spacer in the second CRISPR sequence: ", csesa$spacer2))
+
+    str <- paste("The newly incorporated spacer in the first CRISPR sequence: ", csesa$spacer1, "\n", sep = "")
+    str <- paste(str, "The newly incorporated spacer in the second CRISPR sequence: ", csesa$spacer2, "\n", sep = "")
     
     if (is.na(csesa$spacer1) || is.na(csesa$spacer2)) {
         result <- ""
@@ -281,13 +282,14 @@ PrintClspt <- function(csesa) {
         else 
             result <- paste(csesa$serotype[, 1], collapse = "] [")
         result <- paste("Predicted serotype(s): [", result, sep = "")
-        print(paste(result, "]", sep = ""))
+        str <- paste(str, result, "]", "\n", sep = "")
     }
     else {
         result <- paste(csesa$serotype[, 1], csesa$serotype[, 2])
         result <- paste("Predicted serotype(s): [", paste(result, collapse = "] ["), sep = "")
-        print(paste(result, "]", sep = ""))
+        str <- paste(str, result, "]", "\n", sep = "")
     }
+    str
 }
 
 
