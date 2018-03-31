@@ -7,9 +7,9 @@
 #' @param out.file Into which results will be saved if this value is set. Otherwise results will be displayed on the screen.
 #' @param method The method to handle the input file(s), can only be "PCR" or "WGS".
 #'
-#' @return The subset framedata which indicate the predicted serotype of salmonella.
+#' @return The S3 obeject with class "CSESA", which indicate the predicted serotype of salmonella.
 #' 
-#' @note If you use the "WGS" method, please make sure you have install the BLAST software.
+#' @note If you use the "WGS" method, please make sure you have installed the BLAST software.
 #'
 #' @examples
 #' \dontrun{
@@ -55,6 +55,14 @@ CSESA <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL, method = c(
 }
 
 
+#' Get the CSESA obeject through the two sequence.
+#'
+#' @param seq1 The first DNA sequence.
+#' @param seq2 The second DNA sequence.
+#' @param out.file Into which results will be saved if this value is set. Otherwise results will be displayed on the screen.
+#'
+#' @return The S3 obeject with class "CSESA", which indicate the predicted serotype of salmonella.
+#' 
 PCR <- function(seq1, seq2, out.file) {
     csesa.result <- list()
     
@@ -70,8 +78,17 @@ PCR <- function(seq1, seq2, out.file) {
     else {
         save(csesa.result, file = out.file)
     }
+    
+    csesa.result
 }
 
+
+#' Find the serotype based on the analysis of the new spacers.
+#'
+#' @param file The input fasta file.
+#' 
+#' @return The two DNA molecular sequence.
+#'
 WGS <- function(file) {
     path <- Sys.which("blastn")
     if (all(path == "")) {
@@ -141,6 +158,7 @@ WGS <- function(file) {
     return (list(seq1 = seq1, seq2 = seq2))
 }
 
+
 #' Get the new spacers from the molecular sequence and its reverse complement.
 #'
 #' @param molecular.seq The molecular sequence.
@@ -171,6 +189,7 @@ GetAllNewSpacers <- function(molecular.seq = NULL) {
     else return (new.spacer.arr)
 }
 
+
 #' Find the serotype based on the analysis of the new spacers.
 #'
 #' @param csesa1 The new spacer of the first sequence.
@@ -198,6 +217,7 @@ FindSerotype <- function(csesa1 = NA, csesa2 = NA) {
     }
     return (serotype)
 }
+
 
 #' Get the new spacer from the molecular sequence and map it to the code.
 #'

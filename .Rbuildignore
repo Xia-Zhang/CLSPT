@@ -10,3 +10,5 @@
 ^vignettes$
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^Data_for_ZhangXia$
+^README.md$
