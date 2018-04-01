@@ -94,6 +94,11 @@ WGS <- function(file) {
     db <- file.path(db, "primers")
     blastn <- Sys.which("blastn")
     
+    if (all(blastn == "")) {
+        stop("The BLAST is not found! Please install first!")
+    }
+    blastn = blastn[which(blastn != "")[1]]
+    
     tmpwd <- tempdir()
     curwd <- getwd()
     tmp.prefix <- basename(tempfile(tmpdir = tmpwd))
