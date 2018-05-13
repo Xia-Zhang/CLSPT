@@ -5,13 +5,15 @@
 #' @param in.file1 The first input file, the default value is NULL.
 #' @param in.file2 The second input file (optional), the default value is NULL.
 #' @param out.file Into which results will be saved if this value is set. Otherwise results will be displayed on the screen.
-#' @param method The method to handle the input file(s), can only be "PCR" or "WGS".
+#' @param method  The method to handle the input file(s), which can be set as "PCR" or "WGS". Choose "PCR" if the CRISPR sequence(s) from PCR amplification is entered, and choose "WGS" when entering the whole genome assembly of a Salmonella isolate.
 #' 
-#' @note If you use the "WGS" method, please make sure you have installed the BLAST software.
+#' @note If you use the "WGS" method, please make sure you have installed the BLAST software and included it within the working path.
 #'
 #' @examples
 #' \dontrun{
-#'   CSESA("./testdata/1.fasta", "./testdata/2.fasta")
+#'   CSESA("./testdata/sequence_CRIPSR1.fasta", "./testdata/sequence_CRIPSR2.fasta", method = "PCR")
+#'   CSESA("./testdata/sequence_CRIPSR1.fasta", method = "PCR")
+#'   CSESA("./testdata/Salmonella_whole_genome_assembly.fasta", method = "WGS")
 #' }
 #' @importFrom utils read.table
 #' @import Biostrings
@@ -21,7 +23,7 @@
 CSESA <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL, method = c("PCR", "WGS")) {
     tryCatch({
         if (is.null(in.file1) && is.null(in.file2)) {
-            stop("No such files!")
+            stop("No such file(s)!")
         } 
         method <- toupper(method)
         method <- match.arg(method)
@@ -34,13 +36,13 @@ CSESA <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL, method = c(
             if (is.null(in.file1) == FALSE && file.exists(in.file1)) {
                 file <- in.file1
                 if (is.null(in.file2) == FALSE)
-                    print("Warning: the WGS mode would ignore the in.file2 when input two files.")
+                    print("Warning: under the WGS mode, CSESA would ignore the second file when receiving two input files.")
             }
             else if (is.null(in.file2) == FALSE && file.exists(in.file2)){
                 file <- in.file2
             }
             else {
-                stop("The input files are not exist!")
+                stop("The input file(s) does not exist!")
             }
             wgs.list <- WGS(file)
             seq1 <- wgs.list$seq1
@@ -48,7 +50,7 @@ CSESA <- function(in.file1 = NULL, in.file2 = NULL, out.file = NULL, method = c(
             PCR(seq1, seq2, out.file)
         }
     }, error = function(e) {
-       cat("ERROR :",conditionMessage(e),"\n")
+        cat("ERROR :",conditionMessage(e),"\n")
     })
 }
 
@@ -95,7 +97,7 @@ WGS <- function(file) {
     blastn <- Sys.which("blastn")
     
     if (all(blastn == "")) {
-        stop("The BLAST is not found! Please install first!")
+        stop("The BLAST software has not been employed. Please install it first and check it within the working path.")
     }
     blastn = blastn[which(blastn != "")[1]]
     
@@ -170,7 +172,7 @@ GetAllNewSpacers <- function(molecular.seq = NULL) {
         return (NA)
     molecular.seq.rev <- GetReverseComplement(molecular.seq)
     
-    # handle the Typhi special case
+    # handle the cases specific to Typhi
     typhi <- "ACGGCTATCCTTGTTGACGTGGGGAATACTGCTACACGCAAAAATTCCAGTCGTTGGCGCA"
     if (endsWith(molecular.seq, typhi) || endsWith(molecular.seq.rev, typhi))
         return (c("EntB0var1"))
@@ -212,7 +214,7 @@ FindSerotype <- function(csesa1 = NA, csesa2 = NA) {
     }
     else {
         serotype <- subset(mapping.table, is.element(V1, csesa1) & is.element(V2, csesa2) | 
-                   is.element(V1, csesa2) & is.element(V2, csesa1), select = c(V3, V4))
+                               is.element(V1, csesa2) & is.element(V2, csesa1), select = c(V3, V4))
     }
     return (serotype)
 }
@@ -276,7 +278,7 @@ GetStr <- function(csesa) {
     if (is.null(csesa)) {
         stop("The csesa object should be set!")
     }
-
+    
     str <- paste("The newly incorporated spacer in the first CRISPR sequence: ", csesa$spacer1, "\n", sep = "")
     str <- paste(str, "The newly incorporated spacer in the second CRISPR sequence: ", csesa$spacer2, "\n", sep = "")
     
