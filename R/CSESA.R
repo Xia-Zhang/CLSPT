@@ -203,7 +203,7 @@ FindSerotype <- function(csesa1 = NA, csesa2 = NA) {
         stop("Sorry. We did not find any corresponding serotype in the lib!")
     }
     V1 = V2 = V3 = V4 = NULL
-    mapping.table <- read.table(system.file("extdata", "mapping_tbl.txt", package = "CSESA"), sep = "\t")
+    mapping.table <- read.table(system.file("packageData", "mapping_tbl.txt", package = "CSESA"), sep = "\t")
     if (is.na(csesa1) == TRUE || is.na(csesa2) == TRUE) {
         csesa <- csesa1
         if (is.na(csesa1))
@@ -232,7 +232,7 @@ GetNewSpacerCode <- function(molecular.seq = NULL) {
     if (is.null(new.spacer))
         return (NULL)
     V1 = V3 = NULL
-    spacers.table <- read.table(system.file("extdata", "spacer_tbl.txt", package = "CSESA"))
+    spacers.table <- read.table(system.file("packageData", "spacer_tbl.txt", package = "CSESA"))
     spacer.char <- as.character(subset(spacers.table, V3 == new.spacer, select = V1)[1, 1])
 }
 
@@ -251,7 +251,7 @@ GetNewSpacer <- function(molecular.seq = NULL) {
         return (NULL)
     max.match <- "-"
     max.count <- -1
-    dr.table <- read.table(system.file("extdata", "DR_tbl.txt", package = "CSESA"))
+    dr.table <- read.table(system.file("packageData", "dr_tbl.txt", package = "CSESA"))
     for (x in dr.table$V3[-1]) {
         t <- gregexpr(pattern = x, text = molecular.seq)
         if (t[[1]][1] != -1 && length(t[[1]]) > max.count) {
