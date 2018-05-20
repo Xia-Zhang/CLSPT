@@ -11,9 +11,9 @@
 #'
 #' @examples
 #' \dontrun{
-#'   CSESA("./testdata/sequence_CRIPSR1.fasta", "./testdata/sequence_CRIPSR2.fasta", method = "PCR")
-#'   CSESA("./testdata/sequence_CRIPSR1.fasta", method = "PCR")
-#'   CSESA("./testdata/Salmonella_whole_genome_assembly.fasta", method = "WGS")
+#'   CSESA("./example/sequence_CRIPSR1.fasta", "./example/sequence_CRIPSR2.fasta", method = "PCR")
+#'   CSESA("./example/sequence_CRIPSR1.fasta", method = "PCR")
+#'   CSESA("./example/Salmonella_whole_genome_assembly.fasta", method = "WGS")
 #' }
 #' @importFrom utils read.table
 #' @import Biostrings
