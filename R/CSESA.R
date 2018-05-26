@@ -10,11 +10,9 @@
 #' @note If you use the "WGS" method, please make sure you have installed the BLAST software and included it within the working path.
 #'
 #' @examples
-#' \dontrun{
-#'   CSESA("./example/sequence_CRIPSR1.fasta", "./example/sequence_CRIPSR2.fasta", method = "PCR")
-#'   CSESA("./example/sequence_CRIPSR1.fasta", method = "PCR")
-#'   CSESA("./example/Salmonella_whole_genome_assembly.fasta", method = "WGS")
-#' }
+#'   CSESA("./sequence_CRIPSR1.fasta", "./sequence_CRIPSR2.fasta", method = "PCR")
+#'   CSESA("./sequence_CRIPSR1.fasta", method = "PCR")
+#'   CSESA("./Salmonella_whole_genome_assembly.fasta", method = "WGS")
 #' @importFrom utils read.table
 #' @import Biostrings
 #' 
