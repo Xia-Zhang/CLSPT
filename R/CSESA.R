@@ -279,8 +279,14 @@ GetStr <- function(csesa) {
         stop("The csesa object should be set!")
     }
     
-    str <- paste("The newly incorporated spacer in the first CRISPR sequence: ", csesa$spacer1, "\n", sep = "")
-    str <- paste(str, "The newly incorporated spacer in the second CRISPR sequence: ", csesa$spacer2, "\n", sep = "")
+    if (is.na(csesa$spacer1))
+        str <- "The newly incorporated spacer of the first CRISPR sequence is not available for prediction.\n"
+    else
+        str <- paste("The newly incorporated spacer in the first CRISPR sequence: ", csesa$spacer1, "\n", sep = "")
+    if (is.na(csesa$spacer2))
+        str <- paste0(str, "The newly incorporated spacer of the second CRISPR sequence is not available for prediction.\n")
+    else
+        str <- paste(str, "The newly incorporated spacer in the second CRISPR sequence: ", csesa$spacer2, "\n", sep = "")
     
     if (is.na(csesa$spacer1) || is.na(csesa$spacer2)) {
         result <- ""
