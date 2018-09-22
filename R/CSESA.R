@@ -10,9 +10,11 @@
 #' @note If you use the "WGS" method, please make sure you have installed the BLAST software and included it within the working path.
 #'
 #' @examples
-#'   CSESA("./sequence_CRIPSR1.fasta", "./sequence_CRIPSR2.fasta", method = "PCR")
-#'   CSESA("./sequence_CRIPSR1.fasta", method = "PCR")
-#'   CSESA("./Salmonella_whole_genome_assembly.fasta", method = "WGS")
+#'   CSESA(system.file("extdata", "sequence_CRIPSR1.fasta", package = "CSESA"), 
+#'   system.file("extdata", "sequence_CRIPSR2.fasta", package = "CSESA"), method = "PCR")
+#'   CSESA(system.file("extdata", "sequence_CRIPSR1.fasta", package = "CSESA"), method = "PCR")
+#'   CSESA(system.file("extdata", "Salmonella_whole_genome_assembly.fasta", 
+#'   package = "CSESA"), method = "WGS")
 #' @importFrom utils read.table
 #' @import Biostrings
 #' 
