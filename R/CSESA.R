@@ -114,10 +114,16 @@ WGS <- function(file) {
     setwd(tmpwd)
 
     outfile <- paste(tmp.prefix, ".out", sep = "")
-    data <- readDNAStringSet(file)
+    infile <- paste(tmp.prefix, ".in", sep = "")
 
-    # db = "E:/code/CSESA/inst/primerDB/primers"
-    system(paste(blastn, "-db", db, "-query", file, "-out", outfile, "-outfmt 10", "-task blastn-short"), ignore.stdout = FALSE, ignore.stderr = FALSE)
+    text <- readLines(file)
+    text <- gsub(pattern = " ", replace = "_", x = text)
+    text <- gsub(pattern = ",|#", replace = "", x = text)
+    writeLines(text, con = infile)
+
+    data <- readDNAStringSet(infile)
+
+    system(paste(blastn, "-db", db, "-query", infile, "-out", outfile, "-outfmt 10", "-task blastn-short"), ignore.stdout = FALSE, ignore.stderr = FALSE)
 
     result.table <- read.table(outfile, sep=",", quote = "")
     colnames(result.table) <- c("Query_id",  "Subject_id", "Perc_ident",
@@ -151,7 +157,7 @@ WGS <- function(file) {
         locus.primerB1 = config.primerB1$Query_start
 
         # find the primerB2
-        system(paste(blastn, "-db", db2, "-query", file, "-out", outfile, "-outfmt 10", "-task blastn-short"), ignore.stdout = FALSE, ignore.stderr = FALSE)
+        system(paste(blastn, "-db", db2, "-query", infile, "-out", outfile, "-outfmt 10", "-task blastn-short"), ignore.stdout = FALSE, ignore.stderr = FALSE)
         result.table <- read.table(outfile, sep=",", quote = "")
         colnames(result.table) <- c("Query_id",  "Subject_id", "Perc_ident",
                                     "Align_length", "Mismatches", "Gap_openings", "Query_start", "Query_end",
