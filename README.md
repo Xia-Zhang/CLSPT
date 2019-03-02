@@ -6,10 +6,18 @@ Clustered regularly interspaced short palindromic repeats locus spacer pair typi
 
 ### Installation
 
-Install from github
+#### Install from CRAN
+```r
+install.packages("CSESA")
+```
+
+#### Install from github
+
 ```r
 library("devtools")
 install_github("Xia-Zhang/CSESA")
 library("CSESA")
 CSESA("E:/code/CSESA/testdata/1.fasta", "E:/code/CSESA/testdata/2.fasta")
 ```
+
+

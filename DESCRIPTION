@@ -1,7 +1,7 @@
 Package: CSESA
 Type: Package
 Title: CRISPR-Based Salmonella Enterica Serotype Analyzer
-Version: 1.1.1
+Version: 1.2.0
 Authors@R: c(
     person("Xia", "Zhang", role = c("aut", "cre"), email = "zhangxia9403@gmail.com"),
     person("Lang", "Yang", role = "aut", email = "ylang1992@126.com"))

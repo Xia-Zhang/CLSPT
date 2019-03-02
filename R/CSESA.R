@@ -117,8 +117,8 @@ WGS <- function(file) {
     infile <- paste(tmp.prefix, ".in", sep = "")
 
     text <- readLines(file)
-    text <- gsub(pattern = " ", replace = "_", x = text)
-    text <- gsub(pattern = ",|#", replace = "", x = text)
+    text <- gsub(pattern = " ", replacement = "_", x = text)
+    text <- gsub(pattern = ",|#", replacement = "", x = text)
     writeLines(text, con = infile)
 
     data <- readDNAStringSet(infile)
